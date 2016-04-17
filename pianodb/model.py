@@ -20,11 +20,11 @@ class Album(BaseModel):
     cover_art = CharField(null=True)
 
 
-# TODO: Get song features from `detailUrl`.
 class Song(BaseModel):
     title = CharField()
     album = ForeignKeyField(Album, related_name='songs')
     duration = TimeField()
+    detail_url = CharField()
 
 
 class Feature(BaseModel):

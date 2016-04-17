@@ -39,8 +39,6 @@ def get_track_features(detail_url):
 
 
 def update_db(songfinish):
-    print(get_track_features(songfinish['detailUrl']))
-
     # Search for the Artist, create it if necessary.
     artist = Artist.get_or_create(name=songfinish['artist'])[0]
 
@@ -50,11 +48,18 @@ def update_db(songfinish):
         artist=artist,
         cover_art=songfinish['coverArt'])[0]
 
+    # Strip off any unecessary query string parameters
+    detail_url = songfinish['detailUrl'].split('?')[0]
+
+    # TODO: Actually store these features instead of just printing them.
+    print(get_track_features(detail_url))
+
     # Search for the Song, create it if necessary.
     song = Song.get_or_create(
         title=songfinish['title'],
         album=album,
-        duration=str(timedelta(seconds=int(songfinish['songDuration']))))[0]
+        duration=str(timedelta(seconds=int(songfinish['songDuration']))),
+        detail_url=detail_url)[0]
 
     # Search for the Station, create it if necessary.
     # TODO: Investigate whether Station is correct at time of songfinish.
