@@ -4,9 +4,13 @@ import click
 import pianodb.pianodb
 
 
-@click.command()
-def main():
-    print("Hello world!")
+@click.group(invoke_without_command=True)
+@click.pass_context
+def cli(ctx):
+    if ctx.invoked_subcommand is None:
+        click.echo('running main')
 
-if __name__ == '__main__':
-    main()
+
+@cli.command()
+def server():
+    click.echo('running server')

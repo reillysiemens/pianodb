@@ -18,7 +18,13 @@ with open(version_path, 'r') as version_file:
 
 requirements = [
     'click',
-    # TODO: put additional package requirements here
+    'cython',
+    'falcon',
+    'gunicorn',
+    'lxml',
+    'msgpack-python',
+    'peewee',
+    'requests',
 ]
 
 test_requirements = [
@@ -56,7 +62,7 @@ setup(
     tests_require=test_requirements,
     entry_points={
         'console_scripts': [
-            'pianodb=pianodb.__main__:main',
+            'pianodb=pianodb.__main__:cli',
         ],
     },
 )
