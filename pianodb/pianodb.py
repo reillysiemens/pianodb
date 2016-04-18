@@ -3,6 +3,7 @@ from datetime import timedelta
 
 import requests
 from lxml import html
+from click import Command
 from gunicorn.app.base import BaseApplication
 from gunicorn.six import iteritems
 
@@ -28,6 +29,13 @@ class PianoDBApplication(BaseApplication):
 
 def number_of_workers():
     return (multiprocessing.cpu_count() * 2) + 1
+
+
+def gen_dummy_cmd(name):
+    return Command(name,
+                   help=("This is an unimplimented pianobar eventcmd handler. "
+                         "Calling this subcommand will do absolutely nothing."),
+                   short_help='unimplimented pianobar eventcmd')
 
 
 def get_track_features(detail_url):
