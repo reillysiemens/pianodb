@@ -7,7 +7,7 @@ from click import Command
 from gunicorn.app.base import BaseApplication
 from gunicorn.six import iteritems
 
-from pianodb.model import Artist, Album, Song, Station, Play
+from pianodb.model import Artist, Album, Song, Feature, Station, Play
 
 
 class PianoDBApplication(BaseApplication):
@@ -58,15 +58,21 @@ def update_db(songfinish):
 
     detail_url = songfinish['detailUrl']
 
-    # TODO: Actually store these features instead of just printing them.
-    print(get_track_features(detail_url))
-
     # Search for the Song, create it if necessary.
     song = Song.get_or_create(
         title=songfinish['title'],
         album=album,
         duration=str(timedelta(seconds=int(songfinish['songDuration']))),
         detail_url=detail_url)[0]
+
+    # Search for the Features, create them if necessary.
+    features = [Feature.get_or_create(text=f)[0]
+                for f in get_track_features(detail_url)]
+
+    # Add the Features to Song.features if necessary.
+    for feature in features:
+        if feature not in song.features:
+            song.features.add(feature)
 
     # Search for the Station, create it if necessary.
     # TODO: Investigate whether Station is correct at time of songfinish.
