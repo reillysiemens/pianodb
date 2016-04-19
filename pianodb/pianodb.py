@@ -56,8 +56,7 @@ def update_db(songfinish):
         artist=artist,
         cover_art=songfinish['coverArt'])[0]
 
-    # Strip off any unecessary query string parameters
-    detail_url = songfinish['detailUrl'].split('?')[0]
+    detail_url = songfinish['detailUrl']
 
     # TODO: Actually store these features instead of just printing them.
     print(get_track_features(detail_url))

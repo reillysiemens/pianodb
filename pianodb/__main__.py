@@ -98,7 +98,7 @@ def songfinish(debug):
             'songDuration': fields['songDuration'],
             'songPlayed': fields['songPlayed'],
             'rating': fields['rating'],
-            'detailUrl': fields['detailUrl']
+            'detailUrl': fields['detailUrl'].split('?')[0]  # sans query string
         }
 
         url = "http://{}:{}/api/v1/songfinish".format(config['host'],
