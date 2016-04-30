@@ -32,6 +32,7 @@ server:
     interface: 10.0.0.1
     port: 8000
     workers: 4
+    api_prefix: /api/v1
     token: CB80CB12CC0F41FC87CA6F2AC989E27E
     database: /var/db/piano.db
 ```

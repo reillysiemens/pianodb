@@ -10,8 +10,6 @@ import pianodb.model
 from pianodb.pianodb import get_config, gen_dummy_cmd, PianoDBApplication
 from pianodb.routes import SongFinish
 
-API_PREFIX = '/api/v1'
-
 # Notice the conspicuously absent 'songfinish' event.
 EVENTS = (
     'artistbookmark',
@@ -135,6 +133,6 @@ def server(ctx, debug):
     }
 
     api = falcon.API()
-    api.add_route("{}/songfinish".format(API_PREFIX), SongFinish())
+    api.add_route("{}/songfinish".format(config['api_prefix']), SongFinish())
 
     PianoDBApplication(api, options).run()
