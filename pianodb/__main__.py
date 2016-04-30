@@ -6,8 +6,7 @@ import falcon
 import msgpack
 import requests
 
-import pianodb.model
-from pianodb.pianodb import get_config, gen_dummy_cmd, PianoDBApplication
+from pianodb.pianodb import get_config, gen_dummy_cmd, create_db, PianoDBApplication
 from pianodb.routes import SongFinish
 
 # Notice the conspicuously absent 'songfinish' event.
@@ -41,27 +40,14 @@ EVENTS = (
 @click.group(commands={e: gen_dummy_cmd(e) for e in EVENTS})
 @click.pass_context
 def cli(ctx):
+    cmd = ctx.invoked_subcommand
 
-    if ctx.invoked_subcommand in ('server', 'songfinish'):
+    if cmd in ('songfinish', 'server'):
+        config = get_config()
+        ctx.obj = config['server'] if cmd == 'server' else config['client']
 
-        ctx.obj = get_config()
-
-        # Connect to DB, potentially creating tables, regardless of subcommand.
-        tables = (
-            pianodb.model.Artist,
-            pianodb.model.Album,
-            pianodb.model.Song,
-            pianodb.model.Feature,
-            pianodb.model.SongFeature,
-            pianodb.model.Station,
-            pianodb.model.StationArtist,
-            pianodb.model.StationSong,
-            pianodb.model.Play
-        )
-
-        pianodb.model.db.init(ctx.obj['client']['database'])
-        pianodb.model.db.connect()
-        pianodb.model.db.create_tables(tables, safe=True)
+        if 'database' in ctx.obj:
+            create_db(ctx.obj['database'])
 
 
 @cli.command(help=("songfinish is the handler for pianobar's `songfinish' "
@@ -76,7 +62,7 @@ def songfinish(ctx, debug):
     if debug:
         click.echo('Debugging...')
 
-    config = ctx.obj['client']
+    config = ctx.obj
 
     fields = dict(line.strip().split('=', 1) for line in sys.stdin)
 
@@ -125,7 +111,7 @@ def server(ctx, debug):
     if debug:
         click.echo('Debugging...')
 
-    config = ctx.obj['server']
+    config = ctx.obj
 
     options = {
         'bind': "{}:{}".format(config['interface'], config['port']),

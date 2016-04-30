@@ -12,7 +12,7 @@ from click import Command
 from gunicorn.app.base import BaseApplication
 from gunicorn.six import iteritems
 
-from pianodb.model import Artist, Album, Song, Feature, Station, Play
+import pianodb.model as model
 
 
 class PianoDBApplication(BaseApplication):
@@ -82,12 +82,30 @@ def get_track_features(detail_url):
     return [e.strip() for e in tree.xpath(xpath) if e.strip() != '']
 
 
+def create_db(db_path):
+    tables = (
+        model.Artist,
+        model.Album,
+        model.Song,
+        model.Feature,
+        model.SongFeature,
+        model.Station,
+        model.StationArtist,
+        model.StationSong,
+        model.Play
+    )
+
+    model.db.init(db_path)
+    model.db.connect()
+    model.db.create_tables(tables, safe=True)
+
+
 def update_db(songfinish):
     # Search for the Artist, create it if necessary.
-    artist = Artist.get_or_create(name=songfinish['artist'])[0]
+    artist = model.Artist.get_or_create(name=songfinish['artist'])[0]
 
     # Search for the Album, create it if necessary.
-    album = Album.get_or_create(
+    album = model.Album.get_or_create(
         title=songfinish['album'],
         artist=artist,
         cover_art=songfinish['coverArt'])[0]
@@ -95,14 +113,14 @@ def update_db(songfinish):
     detail_url = songfinish['detailUrl']
 
     # Search for the Song, create it if necessary.
-    song = Song.get_or_create(
+    song = model.Song.get_or_create(
         title=songfinish['title'],
         album=album,
         duration=str(timedelta(seconds=int(songfinish['songDuration']))),
         detail_url=detail_url)[0]
 
     # Search for the Features, create them if necessary.
-    features = [Feature.get_or_create(text=f)[0]
+    features = [model.Feature.get_or_create(text=f)[0]
                 for f in get_track_features(detail_url)]
 
     # Add the Features to Song.features if necessary.
@@ -120,7 +138,7 @@ def update_db(songfinish):
     #       8||8|0:02:26
     #       ...
     #       42||8|0:03:05
-    station = Station.get_or_create(name=songfinish['stationName'])[0]
+    station = model.Station.get_or_create(name=songfinish['stationName'])[0]
 
     # Add the Artist to Station.artists if necessary.
     if artist not in station.artists:
@@ -131,7 +149,7 @@ def update_db(songfinish):
         station.songs.add(song)
 
     # Create a new Play with an implicit timestamp of datetime.now()
-    Play.create(
+    model.Play.create(
         station=station,
         song=song,
         duration=str(timedelta(seconds=int(songfinish['songPlayed']))))
