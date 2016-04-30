@@ -6,7 +6,7 @@ import falcon
 import msgpack
 import requests
 
-from pianodb.pianodb import get_config, gen_dummy_cmd, create_db, PianoDBApplication
+from pianodb.pianodb import get_config, gen_dummy_cmd, create_db, update_db, PianoDBApplication
 from pianodb.routes import SongFinish
 
 # Notice the conspicuously absent 'songfinish' event.
@@ -82,9 +82,12 @@ def songfinish(ctx, debug):
             'detailUrl': fields['detailUrl'].split('?')[0]  # sans query string
         }
 
-        if config['remote']:
-            host = config['remote']['host']
-            port = config['remote']['port']
+        if 'remote' in config:
+            try:
+                host = config['remote']['host']
+                port = config['remote']['port']
+            except KeyError:
+                sys.exit('missing parameters for communication with remote')
             url = "http://{}:{}/api/v1/songfinish".format(host, port)
             r = requests.post(
                 url,
@@ -97,7 +100,7 @@ def songfinish(ctx, debug):
             if not r.ok:
                 click.echo('Something went wrong with the request.')
         else:
-            sys.exit('local usage not yet implemented')
+            update_db(songfinish_data)
 
 
 @cli.command(help=("server starts a Gunicorn webserver with a minimal Falcon "
