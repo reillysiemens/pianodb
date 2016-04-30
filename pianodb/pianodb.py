@@ -1,7 +1,12 @@
+import sys
+import os.path
+import tempfile
 import multiprocessing
 from datetime import timedelta
+from collections import ChainMap
 
 import requests
+import ruamel.yaml
 from lxml import html
 from click import Command
 from gunicorn.app.base import BaseApplication
@@ -36,6 +41,37 @@ def gen_dummy_cmd(name):
                    help=("This is an unimplimented pianobar eventcmd handler. "
                          "Calling this subcommand will do absolutely nothing."),
                    short_help='unimplimented pianobar eventcmd')
+
+
+def get_config(path=None):
+    home = os.environ['HOME']
+    pianobar_path = os.path.join(home, '.config', 'pianobar')
+    pianodb_config_path = os.path.join(pianobar_path, 'pianodb.yml')
+
+    path = path if path else pianodb_config_path
+
+    try:
+        with open(path, 'r') as config_path:
+            config = ruamel.yaml.load(config_path)
+    except (FileNotFoundError, PermissionError):
+        sys.exit('could not load config')
+
+    defaults = {
+        'client': {
+            'remote': None,
+            'threshold': 10,
+            'token': None,
+            'database': os.path.join(pianobar_path, 'piano.db')
+        },
+        'server': {
+            'interface': 'localhost',
+            'port': 8000,
+            'workers': number_of_workers(),
+            'database': os.path.join(tempfile.gettempdir(), 'piano.db'),
+        }
+    }
+
+    return ChainMap(config, defaults)
 
 
 def get_track_features(detail_url):

@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-import os
 import sys
-import json
-import os.path
 
 import click
 import falcon
@@ -10,7 +7,7 @@ import msgpack
 import requests
 
 import pianodb.model
-from pianodb.pianodb import number_of_workers, gen_dummy_cmd, PianoDBApplication
+from pianodb.pianodb import get_config, gen_dummy_cmd, PianoDBApplication
 from pianodb.routes import SongFinish
 
 API_PREFIX = '/api/v1'
@@ -48,6 +45,9 @@ EVENTS = (
 def cli(ctx):
 
     if ctx.invoked_subcommand in ('server', 'songfinish'):
+
+        ctx.obj = get_config()
+
         # Connect to DB, potentially creating tables, regardless of subcommand.
         tables = (
             pianodb.model.Artist,
@@ -61,6 +61,7 @@ def cli(ctx):
             pianodb.model.Play
         )
 
+        pianodb.model.db.init(ctx.obj['client']['database'])
         pianodb.model.db.connect()
         pianodb.model.db.create_tables(tables, safe=True)
 
@@ -71,17 +72,13 @@ def cli(ctx):
                    "data to a remote server."),
              short_help='songfinish eventcmd handler')
 @click.option('--debug', is_flag=True)
-def songfinish(debug):
+@click.pass_context
+def songfinish(ctx, debug):
 
     if debug:
         click.echo('Debugging...')
 
-    home = os.environ['HOME']
-
-    config_path = os.path.join(home, '.config', 'pianobar', 'pianodb.json')
-
-    with open(config_path, 'r') as cf:
-        config = json.load(cf)
+    config = ctx.obj['client']
 
     fields = dict(line.strip().split('=', 1) for line in sys.stdin)
 
@@ -101,18 +98,22 @@ def songfinish(debug):
             'detailUrl': fields['detailUrl'].split('?')[0]  # sans query string
         }
 
-        url = "http://{}:{}/api/v1/songfinish".format(config['host'],
-                                                      config['port'])
-        r = requests.post(
-            url,
-            data=msgpack.packb(songfinish_data),
-            headers={
-                'X-Auth-Token': config['token'],
-                'Content-Type': 'application/msgpack'
-            })
+        if config['remote']:
+            host = config['remote']['host']
+            port = config['remote']['port']
+            url = "http://{}:{}/api/v1/songfinish".format(host, port)
+            r = requests.post(
+                url,
+                data=msgpack.packb(songfinish_data),
+                headers={
+                    'X-Auth-Token': config['token'],
+                    'Content-Type': 'application/msgpack'
+                })
 
-        if not r.ok:
-            click.echo('Something went wrong with the request.')
+            if not r.ok:
+                click.echo('Something went wrong with the request.')
+        else:
+            sys.exit('local usage not yet implemented')
 
 
 @cli.command(help=("server starts a Gunicorn webserver with a minimal Falcon "
@@ -120,14 +121,17 @@ def songfinish(debug):
                    "MessagePack data to create database entries."),
              short_help='start a pianodb webserver')
 @click.option('--debug', is_flag=True)
-def server(debug):
+@click.pass_context
+def server(ctx, debug):
 
     if debug:
         click.echo('Debugging...')
 
+    config = ctx.obj['server']
+
     options = {
-        'bind': "{}:{}".format('127.0.0.1', '8000'),
-        'workers': number_of_workers(),
+        'bind': "{}:{}".format(config['interface'], config['port']),
+        'workers': config['workers'],
     }
 
     api = falcon.API()

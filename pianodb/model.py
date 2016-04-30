@@ -2,7 +2,7 @@ import datetime
 from peewee import Model, CharField, ForeignKeyField, TimeField, DateTimeField, SqliteDatabase
 from playhouse.fields import ManyToManyField
 
-db = SqliteDatabase('piano.db')
+db = SqliteDatabase(None)
 
 
 class BaseModel(Model):

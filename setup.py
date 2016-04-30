@@ -25,6 +25,7 @@ requirements = [
     'msgpack-python',
     'peewee',
     'requests',
+    'ruamel.yaml',
 ]
 
 test_requirements = [
