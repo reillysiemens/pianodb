@@ -15,7 +15,7 @@ class Artist(BaseModel):
 
 
 class Album(BaseModel):
-    title = CharField()
+    title = CharField(unique=True)
     artist = ForeignKeyField(Artist, related_name='albums')
     cover_art = CharField(null=True)
 
