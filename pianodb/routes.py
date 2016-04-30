@@ -3,12 +3,10 @@ import msgpack
 
 from pianodb.pianodb import update_db
 
-TOKEN = 'CB80CB12CC0F41FC87CA6F2AC989E27E'
-
 
 def validate(req, resp, songfinish, params):
     # Verify authentication
-    if req.get_header('X-Auth-Token') != TOKEN:
+    if req.get_header('X-Auth-Token') != songfinish.token:
         raise falcon.HTTPUnauthorized(
             title='Authentication required',
             description='Missing or invalid authentication token')
@@ -20,17 +18,19 @@ def validate(req, resp, songfinish, params):
 @falcon.before(validate)
 class SongFinish:
 
-    song_finish_fields = (
-        'artist',
-        'title',
-        'album',
-        'coverArt',
-        'stationName',
-        'songDuration',
-        'songPlayed',
-        'rating',
-        'detailUrl'
-    )
+    def __init__(self, token):
+        self.token = token
+        self.song_finish_fields = (
+            'artist',
+            'title',
+            'album',
+            'coverArt',
+            'stationName',
+            'songDuration',
+            'songPlayed',
+            'rating',
+            'detailUrl'
+        )
 
     def on_post(self, req, resp):
 

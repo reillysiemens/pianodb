@@ -121,7 +121,9 @@ def server(ctx, debug):
         'workers': config['workers'],
     }
 
+    songfinish_route = "{}/songfinish".format(config['api_prefix'])
+
     api = falcon.API()
-    api.add_route("{}/songfinish".format(config['api_prefix']), SongFinish())
+    api.add_route(songfinish_route, SongFinish(config['token']))
 
     PianoDBApplication(api, options).run()
