@@ -105,10 +105,18 @@ def update_db(songfinish):
     artist = model.Artist.get_or_create(name=songfinish['artist'])[0]
 
     # Search for the Album, create it if necessary.
-    album = model.Album.get_or_create(
-        title=songfinish['album'],
-        artist=artist,
-        cover_art=songfinish['coverArt'])[0]
+    # Take into account that cover_art is always subject to change and we want
+    # to prefer whatever Pandora says is most recent.
+    try:
+        album = model.Album.get(model.Album.title == songfinish['album']
+                                and model.Album.artist == artist)
+        album.cover_art = songfinish['coverArt']
+        album.save()
+    except model.Album.DoesNotExist:
+        album = model.Album.create(
+            title=songfinish['album'],
+            artist=artist,
+            cover_art=songfinish['coverArt'])
 
     detail_url = songfinish['detailUrl']
 
