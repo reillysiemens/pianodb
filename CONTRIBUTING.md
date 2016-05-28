@@ -112,10 +112,6 @@ principles outlined there.
 [pull request]: https://help.github.com/articles/using-pull-requests/
 [forking]: https://help.github.com/articles/fork-a-repo/
 [topic branch]: https://git-scm.com/book/en/v2/Git-Branching-Branching-Workflows#Topic-Branches
-[rustfmt]: https://github.com/rust-lang-nursery/rustfmt
-[Rust book]: https://doc.rust-lang.org/book/
-[Rust by Example]: http://rustbyexample.com/
-[Rust subreddit]: https://www.reddit.com/r/rust/
 [GitHub Flow]: https://guides.github.com/introduction/flow/
 [Nicolas Gallagher]: http://nicolasgallagher.com/
 [issue guidelines]: https://github.com/necolas/issue-guidelines
