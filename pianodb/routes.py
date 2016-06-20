@@ -4,18 +4,18 @@ import msgpack
 from pianodb.pianodb import update_db
 
 
-def validate(req, resp, songfinish, params):
-    # Verify authentication
-    if req.get_header('X-Auth-Token') != songfinish.token:
-        raise falcon.HTTPUnauthorized(
-            title='Authentication required',
-            description='Missing or invalid authentication token')
+class ValidatorComponent:
+    def process_response(self, req, resp, resource):
+        # Verify authentication
+        if req.get_header('X-Auth-Token') != resource.token:
+            raise falcon.HTTPUnauthorized(
+                title='Authentication required',
+                description='Missing or invalid authentication token')
 
-    if not req.content_type == 'application/msgpack':
-        raise falcon.HTTPUnsupportedMediaType('Payload must be msgpack')
+        if not req.content_type == 'application/msgpack':
+            raise falcon.HTTPUnsupportedMediaType('Payload must be msgpack')
 
 
-@falcon.before(validate)
 class SongFinish:
 
     def __init__(self, token):

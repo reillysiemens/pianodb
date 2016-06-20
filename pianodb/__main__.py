@@ -7,7 +7,7 @@ import msgpack
 import requests
 
 from pianodb.pianodb import get_config, gen_dummy_cmd, create_db, update_db, PianoDBApplication
-from pianodb.routes import SongFinish
+from pianodb.routes import ValidatorComponent, SongFinish
 
 # Notice the conspicuously absent 'songfinish' event.
 EVENTS = (
@@ -123,7 +123,7 @@ def server(ctx, debug):
 
     songfinish_route = "{}/songfinish".format(config['api_prefix'])
 
-    api = falcon.API()
+    api = falcon.API(middleware=ValidatorComponent())
     api.add_route(songfinish_route, SongFinish(config['token']))
 
     PianoDBApplication(api, options).run()
