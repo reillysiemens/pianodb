@@ -77,9 +77,15 @@ def get_config(path=None):
 def get_track_features(detail_url):
     xpath = ('//div[@class="song_features clearfix"]/text()|'
              '//div[@style="display: none;"]/text()')
-    page = requests.get(detail_url)
-    tree = html.fromstring(page.content)
-    return [e.strip() for e in tree.xpath(xpath) if e.strip() != '']
+    try:
+        page = requests.get(detail_url)
+        if page.status_code == 200:
+            tree = html.fromstring(page.content)
+            return [e.strip() for e in tree.xpath(xpath) if e.strip() != '']
+        else:
+            return []
+    except requests.ConnectionError:
+        return []
 
 
 def create_db(db_path):
