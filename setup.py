@@ -3,6 +3,7 @@
 import re
 import os.path
 from setuptools import setup, find_packages
+from pip.req import parse_requirements
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -16,17 +17,8 @@ with open(version_path, 'r') as version_file:
     version = re.compile(r".*__version__ = '(.*?)'",
                          re.S).match(version_file.read()).group(1)
 
-requirements = [
-    'click',
-    'cython',
-    'falcon',
-    'gunicorn',
-    'lxml',
-    'msgpack-python',
-    'peewee',
-    'requests',
-    'ruamel.yaml',
-]
+req_path = os.path.join(here, 'requirements.txt')
+requirements = [str(r.req) for r in parse_requirements(req_path, session=False)]
 
 test_requirements = [
     # TODO: put package test requirements here
