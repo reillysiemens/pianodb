@@ -20,9 +20,8 @@ with open(version_path, 'r') as version_file:
 req_path = os.path.join(here, 'requirements.txt')
 requirements = [str(r.req) for r in parse_requirements(req_path, session=False)]
 
-test_requirements = [
-    # TODO: put package test requirements here
-]
+test_req_path = os.path.join(here, 'dev-requirements.txt')
+test_requirements = [str(r.req) for r in parse_requirements(test_req_path, session=False)]
 
 setup(
     name='pianodb',
