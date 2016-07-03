@@ -1,8 +1,8 @@
 import datetime
-from peewee import Model, CharField, ForeignKeyField, TimeField, DateTimeField, SqliteDatabase
+from peewee import Model, CharField, ForeignKeyField, TimeField, DateTimeField, Proxy
 from playhouse.fields import ManyToManyField
 
-db = SqliteDatabase(None)
+db = Proxy()
 
 
 class BaseModel(Model):

@@ -88,7 +88,7 @@ def get_track_features(detail_url):
         return []
 
 
-def create_db(db_path):
+def create_database(database):
     tables = (
         model.Artist,
         model.Album,
@@ -101,7 +101,7 @@ def create_db(db_path):
         model.Play
     )
 
-    model.db.init(db_path)
+    model.db.initialize(database)
     model.db.connect()
     model.db.create_tables(tables, safe=True)
 

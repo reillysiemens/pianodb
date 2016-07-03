@@ -5,8 +5,9 @@ import click
 import falcon
 import msgpack
 import requests
+from peewee import SqliteDatabase
 
-from pianodb.pianodb import get_config, gen_dummy_cmd, create_db, update_db, PianoDBApplication
+from pianodb.pianodb import get_config, gen_dummy_cmd, create_database, update_db, PianoDBApplication
 from pianodb.routes import ValidatorComponent, SongFinish
 
 # Notice the conspicuously absent 'songfinish' event.
@@ -47,7 +48,8 @@ def cli(ctx):
         ctx.obj = config['server'] if cmd == 'server' else config['client']
 
         if 'database' in ctx.obj:
-            create_db(ctx.obj['database'])
+            database = SqliteDatabase(ctx.obj['database'])
+            create_database(database)
 
 
 @cli.command(help=("songfinish is the handler for pianobar's `songfinish' "

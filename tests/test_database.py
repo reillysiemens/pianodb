@@ -1,12 +1,14 @@
 import os
-from pianodb.pianodb import create_db
+from peewee import SqliteDatabase
+from pianodb.pianodb import create_database
 from pianodb.model import Artist
 
 
 def test_sqlite():
     # Setup the database.
     db_path = '/tmp/test-piano.db'
-    create_db(db_path)
+    database = SqliteDatabase(db_path)
+    create_database(database)
 
     # Create a database entry.
     artist = Artist.create(name='test')
