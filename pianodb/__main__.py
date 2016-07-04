@@ -5,7 +5,7 @@ import click
 import falcon
 import msgpack
 import requests
-from peewee import SqliteDatabase
+from playhouse.db_url import connect
 
 from pianodb.pianodb import get_config, gen_dummy_cmd, create_database, update_db, PianoDBApplication
 from pianodb.routes import ValidatorComponent, SongFinish
@@ -48,7 +48,7 @@ def cli(ctx):
         ctx.obj = config['server'] if cmd == 'server' else config['client']
 
         if 'database' in ctx.obj:
-            database = SqliteDatabase(ctx.obj['database'])
+            database = connect(ctx.obj['database'])
             create_database(database)
 
 
