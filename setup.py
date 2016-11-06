@@ -52,6 +52,9 @@ setup(
     ],
     test_suite='tests',
     tests_require=test_requirements,
+    extras_require={
+        'dev': test_requirements,
+    },
     entry_points={
         'console_scripts': [
             'pianodb=pianodb.__main__:cli',
