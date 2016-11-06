@@ -4,7 +4,7 @@ python:
   - '3.4'
   - '3.5'
 install:
-  - "pip install .'[dev]'"
+  - "pip install -e .'[dev]'"
 script: 'py.test'
 services:
   - mysql
