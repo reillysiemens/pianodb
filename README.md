@@ -1,4 +1,4 @@
-# pianodb [![Build Status](https://travis-ci.org/reillysiemens/pianodb.svg?branch=testing)](https://travis-ci.org/reillysiemens/pianodb)
+# pianodb [![Build Status](https://img.shields.io/travis/reillysiemens/pianodb/master.svg?style=flat-square&label=build)](https://travis-ci.org/reillysiemens/pianodb) [![Coverage Status](https://img.shields.io/coveralls/reillysiemens/pianodb/master.svg?style=flat-square&label=coverage)](https://coveralls.io/github/reillysiemens/pianodb?branch=coverage)
 
 A database companion to [pianobar].
 
