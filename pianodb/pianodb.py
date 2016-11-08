@@ -71,7 +71,7 @@ def get_config(path=None):
         }
     }
 
-    return ChainMap(config, defaults)
+    return ChainMap(config, defaults) if config else defaults
 
 
 def get_track_features(detail_url):
