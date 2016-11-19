@@ -9,8 +9,40 @@ import os
 from unittest import mock
 
 import pytest
+import requests
 
-from pianodb.pianodb import number_of_workers, gen_dummy_cmd, get_config
+from pianodb.pianodb import (number_of_workers, gen_dummy_cmd, get_config,
+                             get_track_features)
+
+
+class MockPage:
+    def __init__(self, status_code=200, content=''):
+        self.status_code = status_code
+        self.content = content if content else """
+<!-- https://www.pandora.com/great-jazz-trio/s-wonderful/take-5 -->
+<div class="artist_name" title="The Great Jazz Trio">
+  <span>by</span>
+  <span itemprop="byArtist">
+    <a href="/great-jazz-trio" class="artist_link hash">The Great Jazz Trio</a>
+  </span>
+</div>
+<div class="album_title" title="'S Wonderful">
+  <span>on</span>
+  <a href="/great-jazz-trio/s-wonderful" itemprop="inAlbum" class="album_link hash">'S Wonderful</a>
+</div>
+<div class="song_features clearfix">
+  <h2>Features of This Track</h2>
+  a piano solo<br>
+  an acoustic bass solo<br>
+  a groove oriented approach<br>
+  vamping harmony<br>
+  <div style="display: none;">
+    unusual rhythms<br>
+  </div>
+  <p>These are just a few of the hundreds of attributes cataloged for this track by the Music Genome Project.</p>
+  <a href="#" class="show_more">show more</a>
+</div>
+"""
 
 
 @mock.patch('pianodb.pianodb.multiprocessing')
@@ -120,3 +152,53 @@ def test_pianodb_exits_fatally_without_a_config_file():
     with pytest.raises(SystemExit) as err:
         config = get_config(path='nonexistent')
     assert str(err.value) == 'could not load config'
+
+
+def test_pianodb_can_get_track_features(monkeypatch):
+    """
+    Test that ``pianodb`` can extract track features from a specially formatted
+    web page.
+    """
+
+    def _mock_page(url):
+        return MockPage()
+
+    monkeypatch.setattr(requests, 'get', _mock_page)
+
+    expected = [
+        'a piano solo',
+        'an acoustic bass solo',
+        'a groove oriented approach',
+        'vamping harmony',
+        'unusual rhythms',
+    ]
+
+    assert get_track_features('https://fake-url.tld') == expected
+
+
+def test_pianodb_track_features_empty_if_status_code_is_not_200(monkeypatch):
+    """
+    Test that ``pianodb`` track features are empty when ``requests`` returns
+    a ``status_code`` that is not ``200``.
+    """
+
+    def _mock_page(url):
+        return MockPage(status_code=418, content='teapot')
+
+    monkeypatch.setattr(requests, 'get', _mock_page)
+
+    assert get_track_features('https://fake-url.tld') == []
+
+
+def test_pianodb_track_features_empty_if_requests_connection_error(monkeypatch):
+    """
+    Test that ``pianodb`` track features are empty when ``requests`` raises a
+    ``ConnectionError``.
+    """
+
+    def _raise_connection_error(url):
+        raise requests.ConnectionError()
+
+    monkeypatch.setattr(requests, 'get', _raise_connection_error)
+
+    assert get_track_features('https://fake-url.tld') == []
