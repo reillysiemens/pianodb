@@ -52,7 +52,7 @@ def get_config(path=None):
 
     try:
         with open(path, 'r') as config_path:
-            config = ruamel.yaml.load(config_path)
+            config = ruamel.yaml.safe_load(config_path)
     except (FileNotFoundError, PermissionError):
         sys.exit('could not load config')
 
